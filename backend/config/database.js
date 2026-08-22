@@ -13,15 +13,13 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   enableKeepAlive: true,
-  keepAliveInitialDelayMs: 0,
-  multipleStatements: false
+  keepAliveInitialDelayMs: 0
 });
 
-poll.on('error', (err) => {
+pool.on('error', (err) => {
   console.error('Database pool error:', err);
-  if (err.code === 'PROTOCOL_CONNECTION_LOST') console.error('Database connection was closed.');
-  if (err.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') console.error('Database had a fatal error.');
-  if (err.code === 'PROTOCOL_ENQUEUE_AFTER_INVOKING_ERROR') console.error('Database error.');
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') console.error('Database connection lost');
+  if (err.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') console.error('Database fatal error');
 });
 
 export default pool;

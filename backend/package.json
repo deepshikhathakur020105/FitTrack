@@ -12,7 +12,7 @@
     "seed": "node scripts/seed.js"
   },
   "keywords": ["fitness", "api"],
-  "author": "",
+  "author": "FitTrack Team",
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -36,7 +36,6 @@ export const sendVerificationEmail = async (userId, email, name) => {
           <a href="${verificationLink}" style="display: inline-block; padding: 12px 24px; background: #c8ff00; color: #000; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 20px 0;">
             Verify Email
           </a>
-          <p>Or copy this link: ${verificationLink}</p>
           <p style="color: #888; font-size: 12px;">Link expires in 24 hours.</p>
         </div>
       `
@@ -61,37 +60,11 @@ export const sendPasswordResetEmail = async (email, token) => {
           <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background: #c8ff00; color: #000; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 20px 0;">
             Reset Password
           </a>
-          <p>Or copy this link: ${resetLink}</p>
           <p style="color: #888; font-size: 12px;">Link expires in 24 hours. If you didn't request this, ignore this email.</p>
         </div>
       `
     });
   } catch (err) {
     console.error('Password reset email error:', err);
-  }
-};
-
-export const sendWelcomeEmail = async (email, name) => {
-  try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
-      to: email,
-      subject: '💪 Start Your Fitness Journey with FitTrack',
-      html: `
-        <div style="max-width: 600px; margin: 0 auto; font-family: 'DM Sans', sans-serif;">
-          <h2>Welcome to FitTrack, ${name}!</h2>
-          <p>Your account is all set up. Time to crush your fitness goals! 🎉</p>
-          <ul style="line-height: 2;">
-            <li>📊 Track your daily progress and achievements</li>
-            <li>🧘 Access our curated video library</li>
-            <li>📅 Plan your workouts with the daily planner</li>
-            <li>🔥 Build your streak and stay motivated</li>
-          </ul>
-          <p style="font-size: 16px; font-weight: 600; margin-top: 20px;">Let's do this! 💪</p>
-        </div>
-      `
-    });
-  } catch (err) {
-    console.error('Welcome email error:', err);
   }
 };

@@ -31,12 +31,7 @@ export const errorHandler = (err, req, res, next) => {
     err.message = 'Email already exists';
   }
 
-  if (err.code === 'ER_NO_REFERENCED_ROW') {
-    err.statusCode = 400;
-    err.message = 'Invalid reference';
-  }
-
-  console.error(`[${new Date().toISOString()}] Error:`, err);
+  console.error(`[${new Date().toISOString()}] Error:`, err.message);
 
   res.status(err.statusCode).json({
     success: false,

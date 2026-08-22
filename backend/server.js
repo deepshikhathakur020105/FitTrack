@@ -43,7 +43,7 @@ app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// Error Handler (must be last)
+// Error Handler
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

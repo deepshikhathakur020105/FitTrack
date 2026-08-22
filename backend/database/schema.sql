@@ -1,7 +1,6 @@
 CREATE DATABASE IF NOT EXISTS fittrack;
 USE fittrack;
 
--- Users Table
 CREATE TABLE IF NOT EXISTS users (
   id VARCHAR(36) PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
@@ -19,7 +18,6 @@ CREATE TABLE IF NOT EXISTS users (
   INDEX idx_created_at (created_at)
 );
 
--- User Profiles
 CREATE TABLE IF NOT EXISTS user_profiles (
   id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) UNIQUE NOT NULL,
@@ -43,7 +41,6 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   INDEX idx_user_id (user_id)
 );
 
--- User Preferences
 CREATE TABLE IF NOT EXISTS user_preferences (
   id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) UNIQUE NOT NULL,
@@ -53,7 +50,6 @@ CREATE TABLE IF NOT EXISTS user_preferences (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Daily Tasks
 CREATE TABLE IF NOT EXISTS tasks (
   id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) NOT NULL,
@@ -73,7 +69,6 @@ CREATE TABLE IF NOT EXISTS tasks (
   INDEX idx_task_date (task_date)
 );
 
--- Login Activity
 CREATE TABLE IF NOT EXISTS login_activity (
   id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) NOT NULL,
@@ -85,7 +80,6 @@ CREATE TABLE IF NOT EXISTS login_activity (
   INDEX idx_login_date (login_date)
 );
 
--- User Streaks (cached calculation)
 CREATE TABLE IF NOT EXISTS streaks (
   id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) UNIQUE NOT NULL,
@@ -96,7 +90,6 @@ CREATE TABLE IF NOT EXISTS streaks (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Video Views (for analytics)
 CREATE TABLE IF NOT EXISTS video_views (
   id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) NOT NULL,
@@ -107,7 +100,6 @@ CREATE TABLE IF NOT EXISTS video_views (
   INDEX idx_user_video (user_id, video_id)
 );
 
--- Email Verification Tokens
 CREATE TABLE IF NOT EXISTS email_tokens (
   id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) NOT NULL,
@@ -120,7 +112,6 @@ CREATE TABLE IF NOT EXISTS email_tokens (
   INDEX idx_expires_at (expires_at)
 );
 
--- Password Reset Tokens
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
   id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) NOT NULL,

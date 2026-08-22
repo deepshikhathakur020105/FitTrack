@@ -10,7 +10,6 @@ router.get('/day/:date', asyncHandler(async (req, res) => {
   const userId = req.user.userId;
   const { date } = req.params;
 
-  // Validate date format
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     throw new AppError('Invalid date format. Use YYYY-MM-DD', 400);
   }
@@ -69,7 +68,6 @@ router.put('/:taskId', asyncHandler(async (req, res) => {
   const { taskId } = req.params;
   const updates = req.body;
 
-  // Verify ownership
   const [tasks] = await pool.query(
     'SELECT id FROM tasks WHERE id = ? AND user_id = ?',
     [taskId, userId]
@@ -85,12 +83,7 @@ router.put('/:taskId', asyncHandler(async (req, res) => {
   }
 
   const setClause = updateFields.map(f => `${f} = ?`).join(', ');
-  const values = updateFields.map(f => {
-    if (f === 'is_completed' && updates[f] === true) {
-      return 1; // Will be handled in query
-    }
-    return updates[f];
-  });
+  const values = updateFields.map(f => updates[f]);
 
   const query = `UPDATE tasks SET ${setClause}, updated_at = NOW() WHERE id = ?`;
   values.push(taskId);

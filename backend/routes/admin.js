@@ -23,14 +23,12 @@ router.get('/users', asyncHandler(async (req, res) => {
 
   const [users] = await pool.query(query, params);
 
-  // Get total count
   let countQuery = 'SELECT COUNT(*) as total FROM users';
   if (search) {
     countQuery += ' WHERE name LIKE ? OR email LIKE ?';
   }
   const [countResult] = await pool.query(countQuery, search ? [`%${search}%`, `%${search}%`] : []);
 
-  // Get stats for each user
   const usersWithStats = await Promise.all(users.map(async (user) => {
     const [stats] = await pool.query(`
       SELECT 
@@ -42,10 +40,7 @@ router.get('/users', asyncHandler(async (req, res) => {
       WHERE u.id = ?
     `, [user.id, user.id, user.id]);
 
-    return {
-      ...user,
-      ...(stats[0] || { total_logins: 0, streak: 0, tasks_done: 0 })
-    };
+    return { ...user, ...(stats[0] || { total_logins: 0, streak: 0, tasks_done: 0 }) };
   }));
 
   res.json({ success: true, users: usersWithStats, total: countResult[0].total, page, limit });
@@ -142,12 +137,7 @@ router.get('/users/:userId', asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    user: {
-      ...user[0],
-      profile: profile[0] || {},
-      streak: streak[0] || {},
-      recentTasks: tasks
-    }
+    user: { ...user[0], profile: profile[0] || {}, streak: streak[0] || {}, recentTasks: tasks }
   });
 }));
 
