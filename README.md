@@ -1,4 +1,4 @@
-# FitTrack
+# _FitTrack_
 
 A comprehensive fitness tracking application designed to help you monitor your health, fitness goals, and workout progress.
 
