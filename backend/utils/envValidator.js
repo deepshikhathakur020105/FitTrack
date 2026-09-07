@@ -24,9 +24,9 @@ export function validateEnv() {
   }
 
   if (missing.length > 0) {
-    console.error('❌ Missing required environment variables:');
+    console.error('\n❌ Missing required environment variables:');
     missing.forEach(v => console.error(`   - ${v}`));
-    console.error('\n📝 Please check your .env file and ensure all required variables are set.\n');
+    console.error('\n📋 Please check your .env file and ensure all required variables are set.\n');
     process.exit(1);
   }
 
@@ -54,7 +54,7 @@ export function validateEnvValues() {
 
   // Email configuration should be valid
   if (!process.env.EMAIL_USER.includes('@')) {
-    console.error('❌ Invalid EMAIL_USER format');
+    console.error('\n❌ Invalid EMAIL_USER format. Must be a valid email address.\n');
     process.exit(1);
   }
 }
