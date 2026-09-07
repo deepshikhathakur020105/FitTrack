@@ -37,10 +37,11 @@ export function validateEnv() {
  * Validate environment variable values
  */
 export function validateEnvValues() {
-  // JWT secrets should be at least 32 characters
+  // JWT secrets should be at least 32 characters in production
   if (process.env.NODE_ENV === 'production') {
     if (process.env.JWT_SECRET.length < 32) {
       console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters in production');
+      console.warn('   Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
     }
     if (process.env.JWT_REFRESH_SECRET.length < 32) {
       console.warn('⚠️  WARNING: JWT_REFRESH_SECRET should be at least 32 characters in production');
