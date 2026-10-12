@@ -1,5 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import pool from '../config/database.js';
 import { generateTokens } from '../middleware/auth.js';
@@ -59,7 +60,7 @@ router.post('/signup', validate(signupValidations), asyncHandler(async (req, res
     await conn.rollback();
     throw err;
   } finally {
-    conn.end();
+    conn.release();
   }
 }));
 
@@ -67,7 +68,7 @@ router.post('/signup', validate(signupValidations), asyncHandler(async (req, res
 router.post('/login', validate(loginValidations), asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const [users] = await pool.query(
-    'SELECT id, password_hash, role, is_active FROM users WHERE email = ?',
+    'SELECT id, password_hash, role, is_active, is_email_verified FROM users WHERE email = ?',
     [email]
   );
 
@@ -79,6 +80,10 @@ router.post('/login', validate(loginValidations), asyncHandler(async (req, res) 
 
   if (!user.is_active) {
     throw new AppError('Account has been suspended', 403);
+  }
+
+  if (!user.is_email_verified) {
+    throw new AppError('Please verify your email before logging in', 403);
   }
 
   const isValidPassword = await bcrypt.compare(password, user.password_hash);
@@ -110,7 +115,7 @@ router.post('/login', validate(loginValidations), asyncHandler(async (req, res) 
     success: true,
     accessToken,
     refreshToken,
-    user: { id: user.id, email }
+    user: { id: user.id, email, role: user.role }
   });
 }));
 
@@ -148,7 +153,7 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
   }
 
   const userId = users[0].id;
-  const resetToken = require('crypto').randomBytes(32).toString('hex');
+  const resetToken = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   await pool.query(
@@ -194,7 +199,17 @@ router.post('/refresh', asyncHandler(async (req, res) => {
     throw new AppError('Refresh token required', 401);
   }
 
-  const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+  } catch (err) {
+    throw new AppError('Invalid or expired refresh token', 401);
+  }
+
+  if (!decoded.userId || !decoded.role) {
+    throw new AppError('Invalid token payload', 401);
+  }
+
   const { accessToken, refreshToken: newRefreshToken } = generateTokens(decoded.userId, decoded.role);
 
   res.json({ success: true, accessToken, refreshToken: newRefreshToken });
