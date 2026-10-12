@@ -19,11 +19,18 @@ validateEnv();
 validateEnvValues();
 
 const app = express();
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',');
 
 // Security Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -95,6 +102,7 @@ const server = app.listen(PORT, () => {
   logger.info(`✅ FitTrack API running on port ${PORT}`);
   logger.info(`📝 Environment: ${process.env.NODE_ENV}`);
   logger.info(`🔐 Security: Helmet + Rate Limiting + Input Validation enabled`);
+  logger.info(`🌐 CORS allowed origins: ${allowedOrigins.join(', ')}`);
 });
 
 export default app;
