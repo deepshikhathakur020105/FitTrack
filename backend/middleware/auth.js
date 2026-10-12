@@ -4,19 +4,29 @@ import { AppError } from './errorHandler.js';
 export const authMiddleware = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-    
+
     if (!token) {
       throw new AppError('No token provided', 401);
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        throw new AppError('Token expired', 401);
+      }
+      throw new AppError('Invalid token', 401);
+    }
+
+    if (!decoded.userId || !decoded.role) {
+      throw new AppError('Invalid token payload', 401);
+    }
+
     req.user = decoded;
     next();
   } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      return res.status(401).json({ success: false, message: 'Token expired' });
-    }
-    res.status(401).json({ success: false, message: 'Invalid token' });
+    res.status(err.statusCode || 401).json({ success: false, message: err.message });
   }
 };
 
@@ -28,6 +38,10 @@ export const adminMiddleware = (req, res, next) => {
 };
 
 export const generateTokens = (userId, role) => {
+  if (!userId || !role) {
+    throw new Error('userId and role are required to generate tokens');
+  }
+
   const accessToken = jwt.sign(
     { userId, role },
     process.env.JWT_SECRET,
