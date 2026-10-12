@@ -2,10 +2,10 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import pool from '../config/database.js';
 import { asyncHandler, AppError } from '../middleware/errorHandler.js';
+import { profileValidations, validate } from '../middleware/validation.js';
 
 const router = express.Router();
 
-// GET current user profile
 router.get('/me', asyncHandler(async (req, res) => {
   const userId = req.user.userId;
 
@@ -44,8 +44,7 @@ router.get('/me', asyncHandler(async (req, res) => {
   });
 }));
 
-// UPDATE user profile
-router.put('/profile', asyncHandler(async (req, res) => {
+router.put('/profile', validate(profileValidations), asyncHandler(async (req, res) => {
   const userId = req.user.userId;
   const {
     age, gender, height_cm, weight_kg, target_weight_kg,
@@ -68,9 +67,9 @@ router.put('/profile', asyncHandler(async (req, res) => {
         updated_at = NOW()
       WHERE user_id = ?
     `, [
-      age, gender, height_cm, weight_kg, target_weight_kg,
-      activity_level, medications, health_conditions, dietary_preference,
-      daily_water_goal, preferred_time, days_per_week, session_duration, fitness_level,
+      age ?? null, gender ?? null, height_cm ?? null, weight_kg ?? null, target_weight_kg ?? null,
+      activity_level ?? null, medications ?? null, health_conditions ?? null, dietary_preference ?? null,
+      daily_water_goal ?? null, preferred_time ?? null, days_per_week ?? null, session_duration ?? null, fitness_level ?? null,
       userId
     ]);
   } else {
@@ -80,16 +79,15 @@ router.put('/profile', asyncHandler(async (req, res) => {
         preferred_time, days_per_week, session_duration, fitness_level)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
-      uuidv4(), userId, age, gender, height_cm, weight_kg, target_weight_kg,
-      activity_level, medications, health_conditions, dietary_preference, daily_water_goal,
-      preferred_time, days_per_week, session_duration, fitness_level
+      uuidv4(), userId, age ?? null, gender ?? null, height_cm ?? null, weight_kg ?? null, target_weight_kg ?? null,
+      activity_level ?? null, medications ?? null, health_conditions ?? null, dietary_preference ?? null, daily_water_goal ?? null,
+      preferred_time ?? null, days_per_week ?? null, session_duration ?? null, fitness_level ?? null
     ]);
   }
 
   res.json({ success: true, message: 'Profile updated successfully' });
 }));
 
-// GET preferences
 router.get('/preferences', asyncHandler(async (req, res) => {
   const userId = req.user.userId;
 
@@ -101,10 +99,13 @@ router.get('/preferences', asyncHandler(async (req, res) => {
   res.json({ success: true, preferences: prefs[0]?.preferences || {} });
 }));
 
-// UPDATE preferences
 router.put('/preferences', asyncHandler(async (req, res) => {
   const userId = req.user.userId;
   const preferences = req.body;
+
+  if (typeof preferences !== 'object' || Array.isArray(preferences) || preferences === null) {
+    throw new AppError('Preferences must be a valid JSON object', 400);
+  }
 
   await pool.query(
     'UPDATE user_preferences SET preferences = ?, updated_at = NOW() WHERE user_id = ?',
